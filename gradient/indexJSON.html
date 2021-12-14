@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+
+<script src="https://d3js.org/d3.v6.js"></script>
+
+<div id="my_dataviz"></div>
+
+<script>
+    const margin = { top: 2, right: 2, bottom: 2, left: 2 };
+    const width = 150;
+    const height = 40;
+
+    // append the svg object to the body of the page
+    const svg = d3
+        .select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    d3.text(
+        "my.json",
+    ).then(
+        // Now I can use this dataset:
+        (data) => {
+            const chart = JSON.parse(data).values
+
+            // minY and maxY y observed:
+            const minY = d3.min(chart, (d) => d.y);
+            const maxY = d3.max(chart, (d) => d.y);
+            console.log(minY, maxY)
+
+            // minX and maxX y observed:
+            const minX = d3.min(chart, (d) => d.x);
+            const maxX = d3.max(chart, (d) => d.x);
+            console.log(minX, maxX)
+
+            // Add X axis
+            const x = d3
+                .scaleTime()
+                .domain(d3.extent(chart, (d) => d.x))
+                .range([0, width]);
+
+            // Add Y axis
+            const y = d3.scaleLinear().domain([minY, maxY]).range([height, 0]);
+
+            // Set the gradient
+            svg.append("linearGradient")
+                .attr("id", "line-gradient")
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", x(maxX))
+                .attr("y1", 0)
+                .attr("x2", x(minX))
+                .attr("y2", 0)
+                .selectAll("stop")
+                .data([
+                    { offset: "0%", color: "#E65C00" },
+                    { offset: "100%", color: "#F9D423" },
+
+                    // { offset: "0%", color: "#091E3A" },
+                    // { offset: "50%", color: "#2F80ED" },
+                    // { offset: "100%", color: "#2D9EE0" },
+
+                    // { offset: "0%", color: "#989999" },
+                    // { offset: "100%", color: "#4B4F52" },
+                ])
+                .enter()
+                .append("stop")
+                .attr("offset", (d) => d.offset)
+                .attr("stop-color", (d) => d.color);
+
+            // Add the line
+            svg.append("path")
+                .datum(chart)
+                .attr("fill", "none")
+                .attr("stroke", "url(#line-gradient)")
+                .attr("stroke-width", 2)
+                .attr(
+                    "d",
+                    d3
+                        .line()
+                        .x((d) => x(d.x))
+                        .y((d) => y(d.y))
+                );
+        }
+    );
+</script>
