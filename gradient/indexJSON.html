@@ -20,24 +20,25 @@
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     d3.text(
-        "my.json",
+        "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1&interval=hourly",
     ).then(
         // Now I can use this dataset:
         (data) => {
-            const chart = JSON.parse(data).values
-
+            const chart = JSON.parse(data).market_caps
+            console.log(chart)
+            
             // minY and maxY y observed:
-            const minY = d3.min(chart, (d) => d.y);
-            const maxY = d3.max(chart, (d) => d.y);
+            const minY = d3.min(chart, (d) => d[1]);
+            const maxY = d3.max(chart, (d) => d[1]);
 
             // minX and maxX y observed:
-            const minX = d3.min(chart, (d) => d.x);
-            const maxX = d3.max(chart, (d) => d.x);
+            const minX = d3.min(chart, (d) => d[0]);
+            const maxX = d3.max(chart, (d) => d[0]);
 
             // Add X axis
             const x = d3
                 .scaleTime()
-                .domain(d3.extent(chart, (d) => d.x))
+                .domain(d3.extent(chart, (d) => d[0]))
                 .range([0, width]);
 
             // Add Y axis
@@ -78,8 +79,8 @@
                     "d",
                     d3
                         .line()
-                        .x((d) => x(d.x))
-                        .y((d) => y(d.y))
+                        .x((d) => x(d[0]))
+                        .y((d) => y(d[1]))
                 );
         }
     );
